@@ -32,7 +32,6 @@ def video_play():
     img = Image.fromarray(frame) # Image 객체로 변환
     imgtk = ImageTk.PhotoImage(image=img) # ImageTk 객체로 변환
 
-
     print(type(frame), type(img),type(imgtk))
     object = frame.tofile('file')
 
@@ -40,6 +39,12 @@ def video_play():
     BASE_DIR = Path(__file__).resolve().parent
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+    # OpenCV 동영상
+    lbl1.imgtk = imgtk
+    lbl1.configure(image=imgtk)
+    lbl1.after(10, video_play)
+
+'''
     URL = 'http://127.0.0.1:8000/api_img/upload/'
     target = open(os.path.join(BASE_DIR, 'test.gif'), 'rb')
     print(type(target))
@@ -50,11 +55,8 @@ def video_play():
 
     response = requests.post(URL, data=data, files = upload)
     # print(response)
-        
-    # OpenCV 동영상
-    lbl1.imgtk = imgtk
-    lbl1.configure(image=imgtk)
-    lbl1.after(10, video_play)
+'''        
 
-video_play()
-win.mainloop() #GUI 시작
+if __name__ == "__main__":
+    video_play()
+    win.mainloop() #GUI 시작
