@@ -148,3 +148,5 @@ cython_debug/
 
 app1/media/
 media/
+Scripts/
+pyvenv.cfg
