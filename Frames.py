@@ -15,7 +15,7 @@ MS_PASS_TO_RESTORE      = 5000
 MS_RESTORE_TO_QR        = 2000
 MS_HTTP_REQUEST_INTERVAL = 1000
 
-NUM_VIDEO_CAP           = 30
+NUM_VIDEO_CAP           = 50
 
 URL_SERVER_REQ          = 'http://127.0.0.1:8000/api_img/state/'
 URL_SERVER_CLOSE        = 'http://127.0.0.1:8000/api_img/close/'
@@ -43,7 +43,7 @@ class Frame_qr(tk.Frame):
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Please scan Qr", font=
-                 ('Helvetica', 12)).pack(side="top")
+                 ('Helvetica', 24)).pack()
 
         self.bind('<Key>', self.handler_qr)
         self.focus_set()
@@ -73,21 +73,22 @@ class Frame_wait(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
-        tk.Label(self, text="Wait until scanned", font=
-                 ('Helvetica', 12)).pack(side="top")
+        tk.Label(self, text="Wait until captured", font=
+                 ('Helvetica', 20)).pack(side="top")
+
+        self.win_cap = tk.Label(self)
+        self.win_cap.pack(side="top")
+        print(type(self.win_cap))
 
         self.str_info = tk.StringVar()
         tk.Label(self, textvariable=self.str_info, font=
-                 ('Helvetica', 12)).pack(side="top")
+                 ('Helvetica', 20)).pack(side="bottom")
         self.str_info.set("Capturing.....")
-
-        self.win_cap = tk.Label(self)
-        self.win_cap.pack(side="bottom")
-        print(type(self.win_cap))
-                  
+        
+        '''
         tk.Button(self, text="Scan bottle", command=
                   lambda: master.switch_frame(Frame_pass)).pack(side="bottom")
-
+        '''
         self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http)
 
         self.cap = cv2.VideoCapture(0)
@@ -141,7 +142,7 @@ class Frame_pass(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="Video passed", font=
-                 ('Helvetica', 12)).pack(side="top")
+                 ('Helvetica', 28)).pack()
 
         self.timer = MS_PASS_TO_RESTORE
         self.str_timer = tk.StringVar()
@@ -166,14 +167,14 @@ class Frame_restore(tk.Frame):
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Restoring", font=
-                 ('Helvetica', 18, "bold")).pack(side="top")
+                 ('Helvetica', 28, "bold")).pack()
 
         self.timer = MS_RESTORE_TO_QR
         self.str_timer = tk.StringVar()
         self.str_timer.set("%d sec remain" % (self.timer / 1000))
 
         tk.Label(self, textvariable=self.str_timer, font=
-                 ('Helvetica', 12)).pack(side="bottom")
+                 ('Helvetica', 20)).pack(side="bottom")
 
         master.controller.update('RelayOffMotorOff')
         self.update_clock()
@@ -190,5 +191,5 @@ class Frame_restore(tk.Frame):
 if __name__ == "__main__":
     root = Application()
     root.title("Brave guys")
-    root.geometry("720x720")
+    root.geometry("1280x800")
     root.mainloop()
