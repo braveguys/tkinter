@@ -11,11 +11,12 @@ from controller import Controller
 DEV_PATH_ARDUINO_LINUX  = '/dev/ttyUSB0'
 DEV_PATH_ARDUINO_WIN    = 'COM4'
 
-MS_PASS_TO_RESTORE      = 5000
+MS_PASS_TO_RESTORE      = 2000
 MS_RESTORE_TO_QR        = 2000
 MS_HTTP_REQUEST_INTERVAL = 1000
 
 NUM_VIDEO_CAP           = 50
+NUM_HTTP_RETRY          = 10
 
 URL_SERVER_REQ          = 'http://127.0.0.1:8000/api_img/state/'
 URL_SERVER_CLOSE        = 'http://127.0.0.1:8000/api_img/close/'
@@ -25,7 +26,7 @@ class Application(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self._frame = None
-        self.controller = Controller(DEV_PATH_ARDUINO_WIN)
+        self.controller = Controller(DEV_PATH_ARDUINO_LINUX)
 
         self.switch_frame(Frame_restore)
 
@@ -89,23 +90,25 @@ class Frame_wait(tk.Frame):
         tk.Button(self, text="Scan bottle", command=
                   lambda: master.switch_frame(Frame_pass)).pack(side="bottom")
         '''
-        self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http)
 
         self.cap = cv2.VideoCapture(0)
         self.video_play(NUM_VIDEO_CAP)
 
-    def handler_http(self):
+    def handler_http(self, num_retry):
+        if num_retry == 0:
+            self.master.switch_frame(Frame_qr)
+            return
+
         r = requests.get(URL_SERVER_REQ)
         if r.status_code == 200:
             r = requests.get(URL_SERVER_CLOSE)
             print('http ok')
             self.master.switch_frame(Frame_pass)
         else:
-            print('http failed')
-            self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http)
+            print('http failed retry remain : %d' % num_retry)
+            self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http, num_retry-1)
 
     def video_play(self, num):        
-        print('remain capture' + str(num))
         ret, image = self.cap.read()
 
         if not ret:
@@ -126,8 +129,11 @@ class Frame_wait(tk.Frame):
             response = requests.post(URL_SERVER_UPLOAD, data=data, files = upload)
             print(response)
 
+            self.cap.release()
+
             if response.status_code == 201:
                 self.str_info.set("Captured!")
+                self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http, NUM_HTTP_RETRY)
             else:
                 self.str_info.set("Server Error!")
             return
