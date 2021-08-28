@@ -2,7 +2,9 @@ import requests
 import cv2
 import tkinter as tk
 import numpy as np
+import time
 from PIL import ImageTk, Image
+
 
 from pathlib import Path
 import os
@@ -33,7 +35,7 @@ def video_play():
     imgtk = ImageTk.PhotoImage(image=img) # ImageTk 객체로 변환
 
 
-    print(type(frame), type(img),type(imgtk))
+    # print(type(frame), type(img),type(imgtk))
     object = frame.tofile('file')
 
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,9 +48,8 @@ def video_play():
 
     data = {'remark': 'Geon-Ho'}
     upload = {'file': target}
-    print(type(upload))
 
-    response = requests.post(URL, data=data, files = upload)
+    #response = requests.post(URL, data=data, files = upload)
     # print(response)
         
     # OpenCV 동영상
