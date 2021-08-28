@@ -2,6 +2,8 @@ import tkinter as tk
 import requests
 import cv2
 from PIL import ImageTk, Image
+from pathlib import Path
+import os
 
 from controller import Controller
 
@@ -11,10 +13,14 @@ DEV_PATH_ARDUINO_WIN    = 'COM4'
 
 MS_PASS_TO_RESTORE      = 5000
 MS_RESTORE_TO_QR        = 2000
-MS_HTTP_REQUEST_INTERVAL = 300
+MS_HTTP_REQUEST_INTERVAL = 1000
+
+NUM_VIDEO_CAP           = 30
 
 URL_SERVER_REQ          = 'http://127.0.0.1:8000/api_img/state/'
 URL_SERVER_CLOSE        = 'http://127.0.0.1:8000/api_img/close/'
+URL_SERVER_UPLOAD       = 'http://127.0.0.1:8000/api_img/upload/'
+
 class Application(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -70,6 +76,11 @@ class Frame_wait(tk.Frame):
         tk.Label(self, text="Wait until scanned", font=
                  ('Helvetica', 12)).pack(side="top")
 
+        self.str_info = tk.StringVar()
+        tk.Label(self, textvariable=self.str_info, font=
+                 ('Helvetica', 12)).pack(side="top")
+        self.str_info.set("Capturing.....")
+
         self.win_cap = tk.Label(self)
         self.win_cap.pack(side="bottom")
         print(type(self.win_cap))
@@ -80,7 +91,7 @@ class Frame_wait(tk.Frame):
         self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http)
 
         self.cap = cv2.VideoCapture(0)
-        self.video_play()
+        self.video_play(NUM_VIDEO_CAP)
 
     def handler_http(self):
         r = requests.get(URL_SERVER_REQ)
@@ -92,7 +103,8 @@ class Frame_wait(tk.Frame):
             print('http failed')
             self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http)
 
-    def video_play(self):
+    def video_play(self, num):        
+        print('remain capture' + str(num))
         ret, image = self.cap.read()
 
         if not ret:
@@ -101,11 +113,29 @@ class Frame_wait(tk.Frame):
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         img = Image.fromarray(image)
+
+        if num == 0:
+            cv2.imwrite('__tmp_img.jpg', image)
+            BASE_DIR = Path(__file__).resolve().parent
+            target = open(os.path.join(BASE_DIR, '__tmp_img.jpg'), 'rb')
+
+            data = {'remark': 'jetson'}
+            upload = {'file': target}
+
+            response = requests.post(URL_SERVER_UPLOAD, data=data, files = upload)
+            print(response)
+
+            if response.status_code == 201:
+                self.str_info.set("Captured!")
+            else:
+                self.str_info.set("Server Error!")
+            return
+
         imgtk = ImageTk.PhotoImage(image=img)
 
         self.win_cap.imgtk = imgtk
         self.win_cap.configure(image=imgtk)
-        self.after(10, self.video_play)
+        self.after(10, self.video_play, num-1)
 
 class Frame_pass(tk.Frame):
     def __init__(self, master):
@@ -160,5 +190,5 @@ class Frame_restore(tk.Frame):
 if __name__ == "__main__":
     root = Application()
     root.title("Brave guys")
-    root.geometry("1280x720")
+    root.geometry("720x720")
     root.mainloop()

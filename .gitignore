@@ -153,3 +153,5 @@ pyvenv.cfg
 bin/
 lib*
 file
+*.jpg
+*.gif
