@@ -1,10 +1,10 @@
 import serial
 
 control_code = {
-'RelayOnMotorOn'    : b'a',
-'RelayOnMotorOff'   : b'b',
-'RelayOffMotorOn'   : b'c',
-'RelayOffMotorOff'  : b'd'
+'RelayOnMotorOn'    : b'c',
+'RelayOnMotorOff'   : b'd',
+'RelayOffMotorOn'   : b'a',
+'RelayOffMotorOff'  : b'b'
 }
 
 

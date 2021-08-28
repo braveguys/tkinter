@@ -11,16 +11,18 @@ from controller import Controller
 DEV_PATH_ARDUINO_LINUX  = '/dev/ttyUSB0'
 DEV_PATH_ARDUINO_WIN    = 'COM4'
 
-MS_PASS_TO_RESTORE      = 2000
-MS_RESTORE_TO_QR        = 2000
+MS_PASS_TO_RESTORE      = 1000
+MS_RESTORE_TO_QR        = 1000
 MS_HTTP_REQUEST_INTERVAL = 1000
 
 NUM_VIDEO_CAP           = 50
-NUM_HTTP_RETRY          = 10
+NUM_HTTP_RETRY          = 3
 
-URL_SERVER_REQ          = 'http://127.0.0.1:8000/api_img/state/'
-URL_SERVER_CLOSE        = 'http://127.0.0.1:8000/api_img/close/'
-URL_SERVER_UPLOAD       = 'http://127.0.0.1:8000/api_img/upload/'
+SERVER_ADDRESS          = 'http://192.168.0.13:8000'
+
+URL_SERVER_REQ          = SERVER_ADDRESS + '/api_img/state/'
+URL_SERVER_CLOSE        = SERVER_ADDRESS + '/api_img/close/'
+URL_SERVER_UPLOAD       = SERVER_ADDRESS + '/api_img/upload/'
 
 class Application(tk.Tk):
     def __init__(self):
@@ -44,17 +46,17 @@ class Frame_qr(tk.Frame):
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Please scan Qr", font=
-                 ('Helvetica', 24)).pack()
+                 ('Helvetica', 48)).pack()
 
         self.bind('<Key>', self.handler_qr)
         self.focus_set()
 
-        master.controller.update('RelayOnMotorOff')
+        master.controller.update('RelayOffMotorOff')
 
         self.list_qr = []
         self.str_qr = tk.StringVar()
         tk.Label(self, textvariable=self.str_qr, font=
-                 ('Helvetica', 12)).pack(side="bottom")
+                 ('Helvetica', 32)).pack(side="bottom")
 
 
     def handler_qr(self, event):
@@ -75,15 +77,17 @@ class Frame_wait(tk.Frame):
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Wait until captured", font=
-                 ('Helvetica', 20)).pack(side="top")
+                 ('Helvetica', 40)).pack(side="top")
+
+        master.controller.update('RelayOnMotorOff')
 
         self.win_cap = tk.Label(self)
         self.win_cap.pack(side="top")
-        print(type(self.win_cap))
+#        print(type(self.win_cap))
 
         self.str_info = tk.StringVar()
         tk.Label(self, textvariable=self.str_info, font=
-                 ('Helvetica', 20)).pack(side="bottom")
+                 ('Helvetica', 40)).pack(side="bottom")
         self.str_info.set("Capturing.....")
         
         '''
@@ -96,7 +100,8 @@ class Frame_wait(tk.Frame):
 
     def handler_http(self, num_retry):
         if num_retry == 0:
-            self.master.switch_frame(Frame_qr)
+            self.str_info.set('Dirty!!')
+            self.master.after(MS_PASS_TO_RESTORE, self.master.switch_frame, Frame_qr)
             return
 
         r = requests.get(URL_SERVER_REQ)
@@ -148,14 +153,14 @@ class Frame_pass(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="Video passed", font=
-                 ('Helvetica', 28)).pack()
+                 ('Helvetica', 48)).pack()
 
         self.timer = MS_PASS_TO_RESTORE
         self.str_timer = tk.StringVar()
         self.str_timer.set("%d sec remain" % (self.timer / 1000))
 
         tk.Label(self, textvariable=self.str_timer, font=
-                 ('Helvetica', 12)).pack(side="bottom")
+                 ('Helvetica', 40)).pack(side="bottom")
 
         master.controller.update('RelayOffMotorOn')
         self.update_clock()
@@ -173,14 +178,14 @@ class Frame_restore(tk.Frame):
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Restoring", font=
-                 ('Helvetica', 28, "bold")).pack()
+                 ('Helvetica', 48, "bold")).pack()
 
         self.timer = MS_RESTORE_TO_QR
         self.str_timer = tk.StringVar()
         self.str_timer.set("%d sec remain" % (self.timer / 1000))
 
         tk.Label(self, textvariable=self.str_timer, font=
-                 ('Helvetica', 20)).pack(side="bottom")
+                 ('Helvetica', 40)).pack(side="bottom")
 
         master.controller.update('RelayOffMotorOff')
         self.update_clock()
