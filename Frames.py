@@ -7,6 +7,7 @@ import os
 
 from controller import Controller
 
+cnt_pic = 17
 
 DEV_PATH_ARDUINO_LINUX  = '/dev/ttyUSB0'
 DEV_PATH_ARDUINO_WIN    = 'COM4'
@@ -18,7 +19,7 @@ MS_HTTP_REQUEST_INTERVAL = 1000
 NUM_VIDEO_CAP           = 50
 NUM_HTTP_RETRY          = 3
 
-SERVER_ADDRESS          = 'http://192.168.0.13:8000'
+SERVER_ADDRESS          = 'http://127.0.0.1:8000'
 
 URL_SERVER_REQ          = SERVER_ADDRESS + '/api_img/state/'
 URL_SERVER_CLOSE        = SERVER_ADDRESS + '/api_img/close/'
@@ -74,6 +75,7 @@ class Frame_qr(tk.Frame):
 
 class Frame_wait(tk.Frame):
     def __init__(self, master):
+
         tk.Frame.__init__(self, master)
 
         tk.Label(self, text="Wait until captured", font=
@@ -113,7 +115,8 @@ class Frame_wait(tk.Frame):
             print('http failed retry remain : %d' % num_retry)
             self.after(MS_HTTP_REQUEST_INTERVAL, self.handler_http, num_retry-1)
 
-    def video_play(self, num):        
+    def video_play(self, num):      
+        global cnt_pic
         ret, image = self.cap.read()
 
         if not ret:
@@ -124,7 +127,9 @@ class Frame_wait(tk.Frame):
         img = Image.fromarray(image)
 
         if num == 0:
-            cv2.imwrite('__tmp_img.jpg', image)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            cv2.imwrite('img_%d.jpg' % cnt_pic, image)
+            cnt_pic += 1
             BASE_DIR = Path(__file__).resolve().parent
             target = open(os.path.join(BASE_DIR, '__tmp_img.jpg'), 'rb')
 
