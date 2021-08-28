@@ -5,7 +5,6 @@ import numpy as np
 import time
 from PIL import ImageTk, Image
 
-
 from pathlib import Path
 import os
 
@@ -43,13 +42,13 @@ def video_play():
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
     URL = 'http://127.0.0.1:8000/api_img/upload/'
-    target = open(os.path.join(BASE_DIR, 'test.gif'), 'rb')
+    target = open(os.path.join(MEDIA_ROOT, 'test.gif'), 'rb')
     print(type(target))
 
     data = {'remark': 'Geon-Ho'}
     upload = {'file': target}
 
-    #response = requests.post(URL, data=data, files = upload)
+    response = requests.post(URL, data=data, files = upload)
     # print(response)
         
     # OpenCV 동영상

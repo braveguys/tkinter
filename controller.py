@@ -21,9 +21,9 @@ class Controller:
         while True:
             self.serial.write(code)
             echo = self.serial.read()
-            print("echo %s" % echo)
-            print("code %s" % code)
-            print('-------')
+#            print("echo %s" % echo)
+#            print("code %s" % code)
+#            print('-------')
             if echo == code:
                 break
 
