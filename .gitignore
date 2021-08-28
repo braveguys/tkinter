@@ -151,3 +151,5 @@ media/
 Scripts/
 pyvenv.cfg
 bin/
+lib*
+file

@@ -29,26 +29,25 @@ def video_play():
     if not ret:
         cap.release() # 작업 완료 후 해제
         return
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    img = Image.fromarray(frame) # Image 객체로 변환
+    frame_ = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    img = Image.fromarray(frame_) # Image 객체로 변환
     imgtk = ImageTk.PhotoImage(image=img) # ImageTk 객체로 변환
 
-
-    # print(type(frame), type(img),type(imgtk))
-    object = frame.tofile('file')
+    cv2.imwrite('arbitrary_save.jpg',frame_)
+    #object = frame.tofile('file')
 
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
     BASE_DIR = Path(__file__).resolve().parent
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
     URL = 'http://127.0.0.1:8000/api_img/upload/'
-    target = open(os.path.join(MEDIA_ROOT, 'test.gif'), 'rb')
+    target = open(os.path.join(BASE_DIR, 'test.gif'), 'rb')
     print(type(target))
 
     data = {'remark': 'Geon-Ho'}
     upload = {'file': target}
 
-    response = requests.post(URL, data=data, files = upload)
+    # response = requests.post(URL, data=data, files = upload)
     # print(response)
         
     # OpenCV 동영상
